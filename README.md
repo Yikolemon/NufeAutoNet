@@ -3,6 +3,8 @@
 
 只支持南财电信用户
 
+下载地址：https://github.com/Yikolemon/NufeAutoNet/releases/tag/0.0.1-last
+
 使用教程：
 
 1.你拥有java运行环境（懒得打包了
