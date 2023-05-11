@@ -3,46 +3,42 @@ package com.yikolemon;
 import okhttp3.*;
 
 import java.io.*;
-import java.net.URL;
 import java.util.Properties;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     public static OkHttpClient client = new OkHttpClient();
-    public static void main( String[] args ) throws IOException, InterruptedException {
-        Process pc = Runtime.getRuntime().exec(" cmd /c echo %cd%");
-        pc.waitFor();
-        InputStream xx = pc.getInputStream();
-        byte[] da = new byte[1024];
-        String rs = "";
-        while(xx.read(da) != -1) {
-            rs += new String(da,"GBK");
+    public static void main( String[] args ) throws Exception {
+        Process process = Runtime.getRuntime().exec("cmd /c call .\\关闭windows系统代理.bat");
+        System.out.println(getRes(process));
+        Process process1 = Runtime.getRuntime().exec("netsh wlan add profile filename=wifi.xml");
+        System.out.println(getRes(process1));
+        Process process2 = Runtime.getRuntime().exec("netsh wlan connect name=NUFE-STU");
+        System.out.println(getRes(process2));
+        //让wifi连接上
+        confirmWifiConnect();
+        //校园网压验证
+        sendPost();
+        while (!checkNet()){
+            //检测网络畅通
+            sendPost();
         }
-        System.out.println(rs);
-        Process process = Runtime.getRuntime().exec("netsh wlan add profile filename=wifi.xml");
+    }
 
+    static String getRes(Process process) throws InterruptedException, IOException {
         process.waitFor();
         InputStream inputStream = process.getInputStream();
         byte[] data = new byte[1024];
         String result = "";
         while(inputStream.read(data) != -1) {
             result += new String(data,"GBK");
+            result=result.trim();
         }
-        System.out.println(result);
-        Process process2 = Runtime.getRuntime().exec("netsh wlan connect name=NUFE-STU");
-        process2.waitFor();
-        InputStream inputStream2 = process2.getInputStream();
-        byte[] data2 = new byte[1024];
-        String result2 = "";
-        while(inputStream2.read(data) != -1) {
-            result2 += new String(data,"GBK");
-        }
-        System.out.println(result2);
-        Thread.sleep(2000);
+        return result;
+        //System.out.println(result);
+    }
+
+    static void sendPost() throws IOException {
         String url = "http://10.200.253.5/drcom/login";
         InputStream in = new BufferedInputStream(new FileInputStream("profiles.properties"));
         Properties p = new Properties();
@@ -56,18 +52,40 @@ public class App
         builder.append("&DDDDD="+username+"@njxy");
         builder.append("&upass="+password);
         url=builder.toString();
-
-
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-
         try (Response response = client.newCall(request).execute()) {
             System.out.println( response.body().string());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
+    }
 
+    static boolean checkNet() throws IOException, InterruptedException {
+        Process process = Runtime.getRuntime().exec("ping www.baidu.com");
+        String res = getRes(process);
+        if (res.contains("请求超时")){
+            return false;
+        }
+        //请求超时。
+        return true;
+    }
 
+    static void confirmWifiConnect() throws IOException, InterruptedException {
+        //flag为连接状态
+        boolean flag=false;
+        //未连接上，循环检测
+        while (!flag) {
+            Process process = Runtime.getRuntime().exec("netsh wlan show interfaces");
+            String s=getRes(process);
+            System.out.println(s);
+            if (s.contains("已连接")) {
+                flag=true;
+            }else {
+                //未连接，延迟200ms后检测下一次
+                Thread.sleep(200);
+            }
+        }
     }
 }
