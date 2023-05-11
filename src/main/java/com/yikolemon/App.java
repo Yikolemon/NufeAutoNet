@@ -58,7 +58,7 @@ public class App
         try (Response response = client.newCall(request).execute()) {
             System.out.println( response.body().string());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("等待wifi连接");
         }
     }
 
