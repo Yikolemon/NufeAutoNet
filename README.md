@@ -3,7 +3,7 @@
 
 只支持南财电信用户
 
-下载地址：https://github.com/Yikolemon/NufeAutoNet/releases/tag/0.0.1-last
+下载地址：https://github.com/zko0/NufeAutoNet/releases/download/1.1/release.rar
 
 使用教程：
 
